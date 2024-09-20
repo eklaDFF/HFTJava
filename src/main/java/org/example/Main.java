@@ -5,10 +5,17 @@ import CoinPairs.ADAUSDT;
 import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) throws IOException, InterruptedException {
-        System.out.println("Hello world!");
+    static ADAUSDT adausdt;
+    public static void main(String[] args) throws InterruptedException, IOException {
+        do {
+            startTheADAUSDT();
+            Thread.sleep(86400000);
+            adausdt.closeTheADAUSDTSystem();
+        }while (true);
+    }
 
-        ADAUSDT adausdt = new ADAUSDT();
+    public static void startTheADAUSDT() throws IOException {
+        adausdt = new ADAUSDT();
         if (adausdt.fetchKLineData()==0){
             System.out.println("Fetched Successfully");
         }
@@ -19,18 +26,13 @@ public class Main {
 
         adausdt.calculateLiveEma();
 
-        System.out.println("main method thread->" + Thread.currentThread().getName());
-        do {
-            Thread.sleep(1000);
-        }while (true);
     }
 
-//    public static void main (String[] args){
-//        TestAccount testAccount = new TestAccount();
-//        testAccount.buyLong(0.3340);
-//        testAccount.sellLong(0.3424);
-//
-//        testAccount.buyShort(0.3340);
-//        testAccount.sellShort(0.3424);
+//    public static void main (String[] args) throws IOException {
+//        ADAUSDT adausdt = new ADAUSDT();
+//        adausdt.saveEmaLocally(1032934880229009L,0.34230012735039717);
+//        adausdt.saveEmaLocally(1032934880229009L,0.3422805079857333);
+////        adausdt.findAccurateIndexOfTimestampStoredLocally();
+////        adausdt.isEmaSavedLocally();
 //    }
 }
