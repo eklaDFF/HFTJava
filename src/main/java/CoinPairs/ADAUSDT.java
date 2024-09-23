@@ -3,6 +3,7 @@ package CoinPairs;
 import DataStructures.Candle;
 import DataStructures.EmaTimeCapsule;
 import DataStructures.TwoEmaTimeCapsule;
+import DemaAccount.TestAccount;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +32,13 @@ public class ADAUSDT implements Market, TradingMaths {
     private final File file = new File("ADAUSDT.txt");
     RandomAccessFile randomAccessFileReaderWriter;
 
+    private final File tradeLogFile = new File("ADAUSDTtradesSignals.txt");
+    BufferedWriter bufferedWriter;
+
+    // Below both should be removed later
+    boolean isLongTradeActive = false;
+    boolean isShortTradeActive = false;
+    TestAccount testAccount = new TestAccount();
 
     /*
     * locallySavedTime,locallySavedEma stores the ema saved in local file, and it helps to calculate ema if there is saved ema any
@@ -43,6 +51,11 @@ public class ADAUSDT implements Market, TradingMaths {
             file.createNewFile();
         }
         randomAccessFileReaderWriter = new RandomAccessFile(file,"rw");
+
+        if (!tradeLogFile.exists()){
+            tradeLogFile.createNewFile();
+        }
+        bufferedWriter = new BufferedWriter(new FileWriter(tradeLogFile));
     }
 
     @Override
@@ -130,6 +143,7 @@ public class ADAUSDT implements Market, TradingMaths {
         // Preparing CrossOver variable to track the crossing point of ema and price
         crossOver = (candles[1499].getPrice()) >= currentEma;
         System.out.println("Initially Condition Is CROSSOVER(PRICE>=EMA) : " + crossOver);
+        storeTradeSignalHistory(obj.format(new Date(candles[1499].getTime())) + "Initially Condition Is CROSSOVER(PRICE>=EMA) : " + crossOver);
 
         return 0;
     }
@@ -185,11 +199,25 @@ public class ADAUSDT implements Market, TradingMaths {
                     if (crossOver){
                         if (price < twoEMACapsules.getCurr().getEma()){
                             System.out.println("TRADE ALERT : ShortBuy Condition : CrossUnder begins");
+                            storeTradeSignalHistory(obj.format(new Date(time)) + "TRADE ALERT : ShortBuy Condition : CrossUnder begins");
+                            if (isLongTradeActive){
+                                testAccount.sellLong(price);
+                                isLongTradeActive = false;
+                            }
+                            testAccount.buyShort(price);
+                            isShortTradeActive = true;
                             crossOver = false;
                         }
                     }else {
                         if (price >= twoEMACapsules.getCurr().getEma()){
                             System.out.println("TRADE ALERT : LongBuy Condition : CrossOver begins");
+                            storeTradeSignalHistory(obj.format(new Date(time)) + "TRADE ALERT : LongBuy Condition : CrossOver begins");
+                            if (isShortTradeActive){
+                                testAccount.sellShort(price);
+                                isShortTradeActive = false;
+                            }
+                            testAccount.buyLong(price);
+                            isLongTradeActive = true;
                             crossOver = true;
                         }
                     }
@@ -249,6 +277,25 @@ public class ADAUSDT implements Market, TradingMaths {
         if (webSocketSession.isOpen()){
             System.out.println("Websocket closing");
             webSocketSession.close();
+        }
+    }
+
+    //This is temporary method must be removed
+    public void storeTradeSignalHistory(String s) {
+        try {
+            bufferedWriter.write(s);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

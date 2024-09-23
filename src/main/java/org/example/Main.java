@@ -30,9 +30,7 @@ public class Main {
 
 //    public static void main (String[] args) throws IOException {
 //        ADAUSDT adausdt = new ADAUSDT();
-//        adausdt.saveEmaLocally(1032934880229009L,0.34230012735039717);
-//        adausdt.saveEmaLocally(1032934880229009L,0.3422805079857333);
-////        adausdt.findAccurateIndexOfTimestampStoredLocally();
-////        adausdt.isEmaSavedLocally();
+//        adausdt.storeTradeSignalHistory("hgghh");
+//        adausdt.storeTradeSignalHistory("hgghh");
 //    }
 }
