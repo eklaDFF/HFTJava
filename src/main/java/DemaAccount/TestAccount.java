@@ -8,33 +8,34 @@ public class TestAccount {
     public boolean isLongPositionOpen = false;
     public boolean isShortPositionOpen = false;
 
-    public void buyLong(double price){
+    public String buyLong(double price){
         isLongPositionOpen = true;
         balance -= 500;
         double buyingFee = 0.2;
         feesCollected += buyingFee;
         ADAQuantity = ((500-0.2)/price);
-        System.out.println("TEST_ORDER(BuyLong) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected);
+        return ("TEST_ORDER(BuyLong) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected);
     }
-    public void sellLong(double price){
+    public String sellLong(double price){
         isLongPositionOpen = false;
         double cash = (ADAQuantity)*price;
         double sellingFee = (cash*0.0004);
         feesCollected += sellingFee;
         cash -= sellingFee;
         balance += cash;
-        System.out.println("TEST_ORDER(SellLong) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected + "     Earn=" + cash + ", NewBalance=" + balance);
         ADAQuantity = 0;
+        return  ("TEST_ORDER(SellLong) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected + "     Earn=" + cash + ", NewBalance=" + balance);
+
     }
-    public void buyShort(double price){
+    public String buyShort(double price){
         isShortPositionOpen = true;
         balance -= 500;
         double buyingFee = 0.2;
         feesCollected += buyingFee;
         ADAQuantity = ((500-0.2)/price);
-        System.out.println("TEST_ORDER(BuyShort) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected);
+        return ("TEST_ORDER(BuyShort) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected);
     }
-    public void sellShort(double price){
+    public String sellShort(double price){
         isShortPositionOpen = false;
         double cash = (ADAQuantity)*price;
         double sellingFee = (cash*0.0004);
@@ -43,7 +44,8 @@ public class TestAccount {
         balance += 500;
         balance += diff;
         balance -= sellingFee;
-        System.out.println("TEST_ORDER(SellShort) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected + "     Earn=" + cash + ", NewBalance=" + balance);
         ADAQuantity = 0;
+        return ("TEST_ORDER(SellShort) Filled ADA[Qt: " + ADAQuantity + ", Pc: " + price + "] Total Fees Collected Till Now : " + feesCollected + "     Earn=" + cash + ", NewBalance=" + balance);
+
     }
 }

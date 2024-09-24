@@ -6,12 +6,14 @@ import java.io.IOException;
 
 public class Main {
     static ADAUSDT adausdt;
+    static boolean flagForAllowingSystemToRun = false;
     public static void main(String[] args) throws InterruptedException, IOException {
+        flagForAllowingSystemToRun  = true;
         do {
             startTheADAUSDT();
             Thread.sleep(86400000);
             adausdt.closeTheADAUSDTSystem();
-        }while (true);
+        }while (flagForAllowingSystemToRun);
     }
 
     public static void startTheADAUSDT() throws IOException {
@@ -27,6 +29,8 @@ public class Main {
         adausdt.calculateLiveEma();
 
     }
+
+
 
 //    public static void main (String[] args) throws IOException {
 //        ADAUSDT adausdt = new ADAUSDT();

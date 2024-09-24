@@ -20,6 +20,7 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class ADAUSDT implements Market, TradingMaths {
     Session webSocketSession;
@@ -78,6 +79,7 @@ public class ADAUSDT implements Market, TradingMaths {
 
             // Printing the Fetched EMA to console
             DateFormat obj = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:SSS Z");
+            obj.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
 
             int i=0;
             for (JsonNode node : jsonNode){
@@ -106,6 +108,7 @@ public class ADAUSDT implements Market, TradingMaths {
     public int calculateEMA() throws IOException {
         System.out.println("calculateEMA() called.....");
         DateFormat obj = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:SSS Z");
+        obj.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
         double previousEma;
         double smoother = 0.001998001998001998; // value for (2/(1+N)), N = 1000
 
@@ -161,6 +164,7 @@ public class ADAUSDT implements Market, TradingMaths {
     public void calculateLiveEma(){
         System.out.println("Calculate LIVE Ema called...");
         DateFormat obj = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:SSS Z");
+        obj.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
 
         String liveKLineDataWebSocketURL = "wss://fstream.binance.com/stream?streams=adausdt@kline_5m";
 
@@ -201,10 +205,10 @@ public class ADAUSDT implements Market, TradingMaths {
                             System.out.println("TRADE ALERT : ShortBuy Condition : CrossUnder begins");
                             storeTradeSignalHistory(obj.format(new Date(time)) + "TRADE ALERT : ShortBuy Condition : CrossUnder begins");
                             if (isLongTradeActive){
-                                testAccount.sellLong(price);
+                                storeTradeSignalHistory(testAccount.sellLong(price));
                                 isLongTradeActive = false;
                             }
-                            testAccount.buyShort(price);
+                            storeTradeSignalHistory(testAccount.buyShort(price));
                             isShortTradeActive = true;
                             crossOver = false;
                         }
@@ -213,14 +217,28 @@ public class ADAUSDT implements Market, TradingMaths {
                             System.out.println("TRADE ALERT : LongBuy Condition : CrossOver begins");
                             storeTradeSignalHistory(obj.format(new Date(time)) + "TRADE ALERT : LongBuy Condition : CrossOver begins");
                             if (isShortTradeActive){
-                                testAccount.sellShort(price);
+                                storeTradeSignalHistory(testAccount.sellShort(price));
                                 isShortTradeActive = false;
                             }
-                            testAccount.buyLong(price);
+                            storeTradeSignalHistory(testAccount.buyLong(price));
                             isLongTradeActive = true;
                             crossOver = true;
                         }
                     }
+
+                    // Selling at 2.5 percent
+                    if (crossOver){
+                        if (price>priceAtPercentForLong(price,2.5)){
+                            storeTradeSignalHistory(testAccount.sellLong(price));
+                            isLongTradeActive = false;
+                        }
+                    }else {
+                        if (price<priceAtPercentForShort(price,2.5)){
+                            storeTradeSignalHistory(testAccount.sellShort(price));
+                            isShortTradeActive = false;
+                        }
+                    }
+
                 }
 
                 @OnClose
@@ -297,6 +315,13 @@ public class ADAUSDT implements Market, TradingMaths {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public double priceAtPercentForLong(double price, double percent){
+        return (price + (price * (percent/100.0)));
+    }
+    public double priceAtPercentForShort(double price, double percent){
+        return (price - (price * (percent/100.0)));
     }
 
 }
