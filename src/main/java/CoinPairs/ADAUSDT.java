@@ -56,7 +56,7 @@ public class ADAUSDT implements Market, TradingMaths {
         if (!tradeLogFile.exists()){
             tradeLogFile.createNewFile();
         }
-        bufferedWriter = new BufferedWriter(new FileWriter(tradeLogFile));
+        bufferedWriter = new BufferedWriter(new FileWriter(tradeLogFile,true));
     }
 
     @Override
@@ -201,7 +201,7 @@ public class ADAUSDT implements Market, TradingMaths {
 
                     /* We are Testing our demo account for trading below  */
                     if (crossOver){
-                        if (price < twoEMACapsules.getCurr().getEma()){
+                        if (price < (twoEMACapsules.getCurr().getEma() - 0.0001)){
                             System.out.println("TRADE ALERT : ShortBuy Condition : CrossUnder begins");
                             storeTradeSignalHistory(obj.format(new Date(time)) + "TRADE ALERT : ShortBuy Condition : CrossUnder begins");
                             if (isLongTradeActive){
@@ -213,7 +213,7 @@ public class ADAUSDT implements Market, TradingMaths {
                             crossOver = false;
                         }
                     }else {
-                        if (price >= twoEMACapsules.getCurr().getEma()){
+                        if (price >= (twoEMACapsules.getCurr().getEma() + 0.0001)){
                             System.out.println("TRADE ALERT : LongBuy Condition : CrossOver begins");
                             storeTradeSignalHistory(obj.format(new Date(time)) + "TRADE ALERT : LongBuy Condition : CrossOver begins");
                             if (isShortTradeActive){
@@ -228,14 +228,20 @@ public class ADAUSDT implements Market, TradingMaths {
 
                     // Selling at 2.5 percent
                     if (crossOver){
-                        if (price>priceAtPercentForLong(price,2.5)){
-                            storeTradeSignalHistory(testAccount.sellLong(price));
-                            isLongTradeActive = false;
+                        if (price>priceAtPercentForLong(price,4)){
+                            storeTradeSignalHistory(testAccount.sellLong(price) + " sold at 4%");
+                        }else if (price>priceAtPercentForLong(price,2)){
+                            storeTradeSignalHistory(testAccount.sellLong(price) + " sold at 2%");
+                        } else if (price>priceAtPercentForLong(price,1)) {
+                            storeTradeSignalHistory(testAccount.sellLong(price) + " sold at 1%");
                         }
                     }else {
-                        if (price<priceAtPercentForShort(price,2.5)){
-                            storeTradeSignalHistory(testAccount.sellShort(price));
-                            isShortTradeActive = false;
+                        if (price<priceAtPercentForShort(price,4)){
+                            storeTradeSignalHistory(testAccount.sellShort(price) + " sold at 4%");
+                        }else if (price<priceAtPercentForShort(price,2)){
+                            storeTradeSignalHistory(testAccount.sellShort(price) + " sold at 2%");
+                        }else if (price<priceAtPercentForShort(price,1)){
+                            storeTradeSignalHistory(testAccount.sellShort(price) + " sold at 1%");
                         }
                     }
 
@@ -301,7 +307,7 @@ public class ADAUSDT implements Market, TradingMaths {
     //This is temporary method must be removed
     public void storeTradeSignalHistory(String s) {
         try {
-            bufferedWriter.write(s);
+            bufferedWriter.append(s);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
